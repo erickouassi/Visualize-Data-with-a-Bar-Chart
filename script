@@ -1,1 +1,127 @@
+d3.select("#title")
+  .append("header")
+  .html("<h5>Federal Reserve Economic Data</h5>");
+
+// Import data
+d3.json("https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json", (err, res) => {
+  if(err){
+    console.log(err);
+  }
+  const data = res.data;
+  console.log(data[0]);
+  const totalHeight = 400,
+        totalWidth = 1300,
+        margin = {top: 20, right: 50, bottom: 30, left: 500},
+        width = totalWidth - margin.left - margin.right,
+        height = totalHeight - margin.top - margin.bottom;
+
+
+  const minDate = new Date(data[0][0]),
+        maxDate = new Date(data[data.length-1][0]);
+  
+  const barWidth = width/data.length; 
+  const xScale = d3.scaleTime()
+                 .domain([minDate, maxDate])
+                 .range([0, width]);
+  
+  const yScale = d3.scaleLinear()
+                 .domain([0, d3.max(data, d => d[1])])
+                 .range([height, 0]);
+
+
+  const xAxis = d3.axisBottom(xScale)
+                  .tickFormat(d3.timeFormat("%Y"))
+                  .ticks(10);
+  
+  const yAxis = d3.axisLeft(yScale)
+                  .ticks(8);
+  
+  const display = d3.select(".chart")
+                  .attr("width", totalWidth)
+                  .attr("height", totalHeight)
+                  .append("g")
+                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  const bar = display.selectAll("g")
+                  .data(data)
+                  .enter()
+                  .append("g");
+   
+               bar.append("rect")
+                  .data(data)
+                  .style("fill", "blue")
+                  .classed("bar", "true")
+                  .attr("width", barWidth)
+                  .attr("height", d => height - yScale(d[1]))
+                  .attr("x", (d,i) => barWidth*i) 
+                  .attr("y", (d,i) => yScale(d[1])) 
+                  .attr("data-date", (d,i) => d[0]) 
+                  .attr("data-gdp", d => d[1]) 
+    
+                  .on("mouseover", function(d, i) {
+                    const quarter = new Array("Q1", "Q1", "Q1", "Q2", "Q2", "Q2", "Q3", "Q3", "Q3", "Q4", "Q4", "Q4");
+                    const dataDate = new Date(d[0]);
+                    const dataMonth = dataDate.getMonth();
+                    const dataYear = dataDate.getFullYear();
+         
+                    const displayDate = quarter[dataMonth] + "  " + dataYear;
+                 
+                    d3.select(this)
+                            .style("fill", "white")
+                            .attr("width", 10);
+                      
+                    tooltip.style("opacity", 0.8)
+                           .style('left', (d3.event.pageX - 60) + 'px')
+                           .style('top',  (d3.event.pageY - 100) + 'px')
+                           .attr("id", "tooltip")                          
+                           .attr('data-date', d[0])
+                           .attr("data-gdp", d[1])
+                           
+                           .html("Date: " + displayDate + '<br>' + " GDP: $" + d[1] + " billion");
+                  })
+  // ****
+  
+   .on("mouseout", function(d,i) {
+       d3.select(this)
+         .style("fill", "blue")
+         .attr("width", barWidth);  
+        tooltip.style("opacity", 0);
+         });
+// ***
+ const tooltip = d3.select("#graph")
+      .append("div")
+      .attr("id", "tooltip")
+      .style("z-index", 10)
+      .style("opacity", 0)
+      .text("tooltip");
+// **  
+ display.append("g")
+      .attr("id", "x-axis")
+      .attr("transform", "translate(0," +height +")")
+      .call(xAxis);
+ // ** 
+ display.append("g")
+      .attr("id", "y-axis")
+      .call(yAxis);
+  // **   
+display.append("g")
+      .append("text")
+      .attr("y", totalHeight - margin.bottom)
+      .attr("dy", "2em")
+      .style("font-size", "16px")
+      .attr("fill", "red")
+      .text("Year");
+  // Label 1
+display.append("g")
+      .append("text")
+      .attr("x", -190)
+      .attr("dy", "-2.8em")
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "16px")
+      .attr("fill", "blue")
+      .text("Gross Domestic Product");
+ // ** 
+  d3.selectAll("rect");
+    
+})
 
