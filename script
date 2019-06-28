@@ -1,6 +1,6 @@
 d3.select("#title")
   .append("header")
-  .html("<h5>Federal Reserve Economic Data</h5>");
+  .html("<h1>Federal Reserve Economic Data</h1>");
 
 // Import data
 d3.json("https://raw.githubusercontent.com/FreeCodeCamp/ProjectReferenceData/master/GDP-data.json", (err, res) => {
